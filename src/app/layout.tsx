@@ -20,7 +20,7 @@ const code = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "FounderOps — AI Chief of Staff",
   description: "The typed memory layer for founders. Decisions, commitments, blockers and metrics, captured with provenance.",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  // Favicon is provided by src/app/icon.svg (FounderOps brand mark).
 };
 
 export default async function RootLayout({
