@@ -74,12 +74,12 @@ export default function Sidebar() {
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ];
 
+  // The toolkits FounderOps actually ingests memory from (connected via Composio).
   const connectedSources = [
     { name: 'Gmail', icon: Mail, status: 'synced', color: 'text-rose-400' },
-    { name: 'Slack', icon: Slack, status: 'synced', color: 'text-indigo-400' },
-    { name: 'Linear', icon: FolderKanban, status: 'synced', color: 'text-purple-400' },
-    { name: 'Notion', icon: FileText, status: 'synced', color: 'text-amber-400' },
     { name: 'Calendar', icon: CalendarDays, status: 'synced', color: 'text-teal-400' },
+    { name: 'Slack', icon: Slack, status: 'synced', color: 'text-indigo-400' },
+    { name: 'Notion', icon: FileText, status: 'synced', color: 'text-amber-400' },
   ];
 
   return (
