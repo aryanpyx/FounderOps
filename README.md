@@ -89,22 +89,9 @@ The pipeline is **selective by design** — newsletters and notifications are fi
 
 ## Architecture
 
-```
-   Connected tools (Composio OAuth)          Frontend — Next.js 15 + React 19
- Gmail · Calendar · Slack · Notion ───┐      cockpit · ask · brief · graph · explorer
- Sheets · Drive · Docs · Tasks        │                     │
-                ▲                     │                     ▼
-                │              ┌───────┴───── Intelligence Engine ─────────────┐
-                │              │  ingest → signal-filter → extract → link →    │
-                │              │  prompts (brief / weekly / decision-recovery) │
-                │              └────────────────────┬──────────────────────────┘
-                │                          ┌─────────┴─────────┐
-                │                          ▼                   ▼
-                │            Postgres + pgvector          TrustClaw agent
-                │            (typed memory + graph)       (tools + scheduler / cron)
-                └────────────────────◀──────────────────────┘
-                        daily cron passively ingests from the same tools
-```
+<div align="center">
+  <img src="public/arch.png" alt="FounderOps architecture — Next.js frontend → intelligence engine (filter, extract, link, reason) → Postgres/pgvector memory + TrustClaw agent → Composio-connected tools" width="840" />
+</div>
 
 **Flow.** The founder works in the Next.js UI → the **Intelligence Engine** (signal-filter → LLM extraction → record-linker) converts raw activity into typed memory in **Postgres/pgvector** → the **TrustClaw agent** brokers every tool call through **Composio** (OAuth, sandboxed) → a **daily cron** runs the same pipeline passively so memory accrues on its own.
 
