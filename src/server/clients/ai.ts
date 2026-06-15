@@ -85,10 +85,11 @@ const nvidia = env.NVIDIA_API_KEY
       fetch: nimFetch,
     })
   : null;
-// Highest-fidelity agentic model on NIM. Alternatives (swap here, all tested OK
-// for tool-calling): "openai/gpt-oss-120b", "nvidia/llama-3.3-nemotron-super-49b-v1.5",
-// "qwen/qwen3-next-80b-a3b-instruct", "meta/llama-3.3-70b-instruct".
-const NVIDIA_MODEL = "moonshotai/kimi-k2.6";
+// Agentic model on NIM. llama-3.3-70b is the reliable default for English
+// tool-calling — kimi-k2.6 was hallucinating "tool failed" responses and leaking
+// garbled multilingual tokens instead of actually invoking tools. Alternatives
+// (swap here): "openai/gpt-oss-120b", "nvidia/llama-3.3-nemotron-super-49b-v1.5".
+const NVIDIA_MODEL = "meta/llama-3.3-70b-instruct";
 
 // Tool-calling capable Groq model. Change here to swap chat models globally.
 // llama-3.3-70b-versatile: 12k TPM (fits the agent's ~9k request) and the only
