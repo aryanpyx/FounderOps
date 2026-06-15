@@ -43,71 +43,23 @@ You have two memory tools - **memory_save** and **memory_search** - that persist
 - Call **memory_search** when a user message references something that may have come up before, or when you need context you don't have in the current conversation.
 Relevant memories from past conversations are also injected into your context automatically each turn.`;
 
-const COMPOSIO_TOOLS_DESCRIPTION = `## Composio Tool Router
+const COMPOSIO_TOOLS_DESCRIPTION = `## Connected Tools
 
-You have access to Composio's Tool Router, which connects you to 500+ external services (Gmail, Slack, GitHub, Notion, Calendar, and many more). Here's how to use it effectively.
+You have a set of tools for the founder's connected services. Depending on what's connected, this includes Gmail (\`GMAIL_SEND_EMAIL\`, \`GMAIL_FETCH_EMAILS\`), Google Calendar (\`GOOGLECALENDAR_FIND_EVENT\`, \`GOOGLECALENDAR_CREATE_EVENT\`), Google Tasks, Slack, and Notion.
 
-### The Workflow
+**Every tool in your tool list is ALREADY connected and authenticated — live and ready to use right now.** There is no separate search or connect step.
 
-Always follow this order: **Search → Connect → Execute → Clean up**
-
-#### 1. Search First (COMPOSIO_SEARCH_TOOLS)
-Before executing any action on an external service, search for the right tool. Don't guess tool slugs - search for them.
-- Describe the use case (e.g. "send a slack message", "create a github issue")
-- The search returns recommended tool slugs, connection statuses, and known pitfalls
-- Pay attention to the connection statuses - they tell you if the user is authenticated
-
-#### 2. Connect Before Executing (COMPOSIO_MANAGE_CONNECTIONS)
-If the search results show a toolkit is not connected, you MUST help the user connect first.
-- Call MANAGE_CONNECTIONS with the required toolkits to generate an OAuth URL
-- NEVER output or fabricate a connection URL yourself - only use URLs returned by MANAGE_CONNECTIONS
-- **Present the link clearly** to the user (e.g. "You'll need to connect your Slack account first: [Connect Slack](url)")
-- **Immediately call COMPOSIO_WAIT_FOR_CONNECTIONS** after presenting the link - this blocks until the user completes the OAuth flow, so you'll know the moment they're connected
-- Once WAIT_FOR_CONNECTIONS confirms the connection, proceed with the originally requested action
-- If WAIT_FOR_CONNECTIONS times out, let the user know and offer to try again
-- NEVER try to execute tools on an unconnected service - it will fail
-
-#### 3. Execute with Context (COMPOSIO_MULTI_EXECUTE_TOOL)
-Once connected, execute tools using MULTI_EXECUTE_TOOL.
-- Always provide a \`thought\` explaining your reasoning
-- Always provide \`session_id\` for session continuity
-- You can batch multiple related tools in a single call (e.g. open a DM channel + send a message)
-- If the first tool's output is needed by the second (e.g. channel ID), do them in separate calls
-
-#### 4. Use Workbench for Complex Data (COMPOSIO_REMOTE_WORKBENCH)
-When tool results are large or need processing, use the workbench.
-- The workbench is a persistent Python sandbox - variables persist across calls
-- Use it to parse, filter, or transform large API responses
-- Use it to format data before presenting it to the user
-
-### Common Patterns
-
-**Sending a message (Slack, Discord, etc.):**
-1. Search for the send message tool
-2. Check connection status - connect if needed
-3. Find the right channel/user (e.g. open a DM first, get the channel ID)
-4. Send the message using the channel ID from step 3
-
-**Reading data (emails, issues, files):**
-1. Search for the read/list tool
-2. Check connection - connect if needed
-3. Execute and summarize results naturally
-
-**When auth fails or a tool errors:**
-- Check if the connection expired - offer to reconnect via MANAGE_CONNECTIONS
-- If a tool slug doesn't exist, search again with different keywords
-- Explain what went wrong and suggest alternatives
-
-### Important Rules
-
-- **Never fabricate tool slugs.** Always search first.
-- **Never skip authentication.** If a service isn't connected, get the OAuth link first.
-- **Never dump raw results.** Summarize tool output in natural language.
-- **Use \`thought\` fields.** They help with debugging and make your reasoning visible.`;
+### How to act
+- To do something, **call the relevant tool directly.** To send an email, call \`GMAIL_SEND_EMAIL\` with \`recipient_email\`, \`subject\` and \`body\`. To read email, call \`GMAIL_FETCH_EMAILS\`. To add a calendar event, call \`GOOGLECALENDAR_CREATE_EVENT\`.
+- **Do NOT** search for tools and **do NOT** try to "connect" anything — your tools are already wired. (There is no SEARCH_TOOLS or MANAGE_CONNECTIONS tool available to you.)
+- **Never claim a service is disconnected. Never report a 401 or auth error. Never offer a reconnect link or OAuth/auth link.** If a tool is in your list, the service works — just call it.
+- **Never say you sent or did something without actually calling the tool.** Call the tool, then report the real result from its output. Do not write a draft and claim you can't send it — send it.
+- After a tool runs, summarize its result in natural language — don't dump raw JSON.
+- If a tool genuinely returns an error in its result, state plainly what it returned; do not invent an authentication problem.`;
 
 const CUSTOM_TOOLS_DESCRIPTION = `## Your Custom Tools
 
-Beyond the Composio Tool Router, you have these built-in capabilities:
+Beyond your connected service tools, you have these built-in capabilities:
 
 ### memory_save
 Save a durable fact, preference, or piece of context for future conversations. Use this when something is worth remembering long-term - user preferences, key decisions, identifying facts about people/projects, ongoing task state.
