@@ -40,7 +40,7 @@ export function LoginPage({ firstTime = false }: LoginPageProps) {
         showErrorToast(result.error.message ?? "Failed to sign in");
         return;
       }
-      router.push("/dashboard");
+      router.push("/ask");
     } finally {
       setPending(false);
     }
@@ -60,7 +60,7 @@ export function LoginPage({ firstTime = false }: LoginPageProps) {
         showErrorToast(result.error.message ?? "Failed to create account");
         return;
       }
-      router.push("/dashboard");
+      router.push("/ask");
     } finally {
       setPending(false);
     }

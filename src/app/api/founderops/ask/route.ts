@@ -62,14 +62,20 @@ export async function POST(request: Request) {
       })),
     );
 
-    // Capture any decision/commitment/blocker/metric the founder stated into
-    // typed memory. Non-fatal - a failure here never breaks the answer.
-    const captured = await extractMemories(
-      instance.id,
-      `Founder said: ${parsed.data.query}\n\nAssistant replied: ${answer}`,
-      "chat",
-      session.user.name ?? "Founder",
-    ).catch(() => ({ inserted: 0, found: 0 }));
+    // Capture typed memory ONLY when the turn was a statement of record, not an
+    // action. If the agent executed tools (send email, create calendar event,
+    // etc.), the founder asked it to *do* something — storing that command as a
+    // Decision/Commitment is noise. Record-keeping turns ("we decided…", "I'll
+    // ship Friday", "MRR went 1.2k→1.5k") run no tools, so we only extract then.
+    const captured =
+      toolCalls.length > 0
+        ? { inserted: 0, found: 0 }
+        : await extractMemories(
+            instance.id,
+            `Founder said: ${parsed.data.query}\n\nAssistant replied: ${answer}`,
+            "chat",
+            session.user.name ?? "Founder",
+          ).catch(() => ({ inserted: 0, found: 0 }));
 
     return new Response(
       JSON.stringify({ answer, toolCalls, captured: captured.inserted }),

@@ -213,17 +213,11 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* User Card */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center font-bold text-xs text-indigo-300">
-            SJ
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-white truncate leading-none mb-0.5">Sarah Jenkins</p>
-            <p className="text-[10px] text-muted-foreground truncate leading-none">Founder & CEO</p>
-          </div>
-          <div className="flex items-center" title="TrustClaw Secured">
-            <ShieldCheck className="w-4 h-4 text-emerald-400 cursor-pointer hover:text-emerald-300 transition-colors" />
+        {/* Brand Card */}
+        <div className="flex items-center justify-between gap-3">
+          <FounderOpsLogo size="md" />
+          <div className="flex items-center" title="Secured session">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
           </div>
         </div>
       </div>
