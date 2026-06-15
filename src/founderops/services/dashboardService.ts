@@ -1,5 +1,5 @@
 import { fetchMemories } from './_data';
-import { Commitment, MemoryItem } from '../types';
+import type { Commitment, MemoryItem } from '../types';
 
 export interface DashboardSummary {
   kpis: {

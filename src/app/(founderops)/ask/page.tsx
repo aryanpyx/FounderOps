@@ -17,8 +17,8 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import Slack from '@/components/icons/Slack';
-import { queryService, AnswerPayload } from '@/services/queryService';
-import { SourceSystem } from '@/types';
+import { queryService, type AnswerPayload } from '@/services/queryService';
+import type { SourceSystem } from '@/types';
 import MemoryDetailPanel from '@/components/MemoryDetailPanel';
 
 function prettyJson(value: unknown): string {
@@ -232,7 +232,10 @@ export default function AskFounderOps() {
     </div>
   );
 
-  const lastPayload = turns.length ? turns[turns.length - 1].payload : null;
+  // Most recent turn that actually executed tools. We keep showing it even while
+  // the next answer is loading, so the panel never flickers away between prompts.
+  const toolTurn = [...turns].reverse().find((t) => t.payload && t.payload.toolCalls.length > 0);
+  const latestToolCalls = toolTurn?.payload?.toolCalls ?? [];
 
   return (
     <div className="flex-1 flex flex-row min-h-0">
@@ -357,18 +360,32 @@ export default function AskFounderOps() {
         </div>
       </div>
 
-      {/* Tool Execution panel (right rail) - real tools from the latest turn */}
-      {lastPayload && lastPayload.toolCalls.length > 0 && (
-        <aside className="hidden lg:flex w-[360px] shrink-0 flex-col border-l border-border bg-background/40 overflow-y-auto">
-          <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-border bg-background/80 px-4 py-3 backdrop-blur">
-            <Terminal className="h-4 w-4 text-indigo-400" />
-            <span className="text-xs font-bold text-white">Tool Execution</span>
-            <span className="ml-auto rounded bg-border/40 px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
-              {lastPayload.toolCalls.length} call{lastPayload.toolCalls.length === 1 ? '' : 's'}
+      {/* Tool Execution panel (right rail) - always present, persists between prompts */}
+      <aside className="hidden lg:flex w-[360px] shrink-0 flex-col border-l border-border bg-background/40 overflow-y-auto">
+        <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-border bg-background/80 px-4 py-3 backdrop-blur">
+          <Terminal className="h-4 w-4 text-indigo-400" />
+          <span className="text-xs font-bold text-white">Tool Execution</span>
+          {isThinking ? (
+            <span className="ml-auto flex items-center gap-1.5 font-mono text-[10px] text-indigo-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" /> running…
             </span>
-          </div>
-          <div className="space-y-3 p-3">
-            {lastPayload.toolCalls.map((tc, i) => (
+          ) : (
+            <span className="ml-auto rounded bg-border/40 px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
+              {latestToolCalls.length} call{latestToolCalls.length === 1 ? '' : 's'}
+            </span>
+          )}
+        </div>
+        <div className="space-y-3 p-3">
+          {latestToolCalls.length === 0 ? (
+            <div className="mt-6 px-4 text-center">
+              <Terminal className="mx-auto h-6 w-6 text-border" />
+              <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed">
+                Live tool calls appear here. Ask FounderOps to check your email, calendar, or Slack and you&apos;ll
+                see each tool, its arguments, and its result.
+              </p>
+            </div>
+          ) : (
+            latestToolCalls.map((tc, i) => (
               <div key={i} className="overflow-hidden rounded-lg border border-border/60 bg-card/50">
                 <div className="flex items-center gap-2 border-b border-border/40 px-3 py-2">
                   <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
@@ -385,10 +402,10 @@ export default function AskFounderOps() {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </aside>
-      )}
+            ))
+          )}
+        </div>
+      </aside>
 
       <MemoryDetailPanel
         memoryId={selectedMemoryId}

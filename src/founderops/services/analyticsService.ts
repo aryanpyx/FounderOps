@@ -55,21 +55,19 @@ export const analyticsService = {
     // 3. Completion Stats by Owner
     const completionByOwner: { [owner: string]: { completed: number; pending: number } } = {};
     commitments.forEach((c) => {
-      if (!completionByOwner[c.owner]) {
-        completionByOwner[c.owner] = { completed: 0, pending: 0 };
-      }
+      const entry = completionByOwner[c.owner] ?? { completed: 0, pending: 0 };
       if (c.status === 'Fulfilled') {
-        completionByOwner[c.owner].completed++;
+        entry.completed++;
       } else {
-        completionByOwner[c.owner].pending++;
+        entry.pending++;
       }
+      completionByOwner[c.owner] = entry;
     });
 
-    const completionStats = Object.keys(completionByOwner).map((owner) => {
-      const { completed, pending } = completionByOwner[owner];
-      const total = completed + pending;
-      const rate = total > 0 ? Math.round((completed / total) * 100) : 100;
-      return { owner, completed, pending, rate };
+    const completionStats = Object.entries(completionByOwner).map(([owner, stats]) => {
+      const total = stats.completed + stats.pending;
+      const rate = total > 0 ? Math.round((stats.completed / total) * 100) : 100;
+      return { owner, completed: stats.completed, pending: stats.pending, rate };
     });
 
     // 4. Decision Trends
@@ -82,15 +80,15 @@ export const analyticsService = {
       let formattedDate = dateStr;
       if (dateParts.length === 3) {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const mIdx = parseInt(dateParts[1], 10) - 1;
-        formattedDate = `${months[mIdx]} ${dateParts[2]}`;
+        const mIdx = parseInt(dateParts[1] ?? '1', 10) - 1;
+        formattedDate = `${months[mIdx] ?? ''} ${dateParts[2] ?? ''}`;
       }
       decisionDates[formattedDate] = (decisionDates[formattedDate] || 0) + 1;
     });
 
     // Sort dates logically
     const decisionTrends = Object.keys(decisionDates)
-      .map((date) => ({ date, count: decisionDates[date] }))
+      .map((date) => ({ date, count: decisionDates[date] ?? 0 }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     // 5. Category Breakdown (mocking tool dependencies usage)

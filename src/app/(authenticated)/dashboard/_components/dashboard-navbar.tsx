@@ -17,7 +17,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { ThemeToggle } from "~/components/core/theme-toggle";
-import { TrustClawBrand } from "~/app/_components/trustclaw-brand";
+import { FounderOpsLogo } from "~/founderops/components/FounderOpsLogo";
 import { authClient } from "~/clients/auth/react";
 import { useTerminalStore } from "./terminal-store";
 
@@ -40,7 +40,9 @@ export function DashboardNavbar() {
 
   return (
     <header className="border-border bg-background/95 flex h-14 shrink-0 items-center justify-between border-b px-4 backdrop-blur">
-      <TrustClawBrand size="sm" logoLink="/dashboard" />
+      <Link href="/daily-brief" className="flex items-center">
+        <FounderOpsLogo size="md" />
+      </Link>
 
       <div className="flex items-center gap-1">
         <Tooltip>

@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { db } from "~/server/clients/db";
+import { db, Prisma } from "~/server/clients/db";
 import { chatModel } from "~/server/clients/ai";
 
 interface Extracted {
@@ -119,7 +119,7 @@ export async function extractMemories(
           e.details,
           e.title ?? "",
           e.content ?? "",
-        ),
+        ) as Prisma.InputJsonValue,
       },
     });
     inserted++;

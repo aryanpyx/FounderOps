@@ -1,4 +1,4 @@
-import { MemoryItem } from '../types';
+import type { MemoryItem } from '../types';
 
 // Single source of real founder-memory data for all services.
 // Hits the same-origin /api/founderops/memories endpoint (session cookie sent

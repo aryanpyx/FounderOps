@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import Slack from '@/components/icons/Slack';
 import { memoryService } from '@/services/memoryService';
-import { MemoryItem, SourceSystem } from '@/types';
+import type { MemoryItem, SourceSystem } from '@/types';
 
 interface MemoryDetailPanelProps {
   memoryId: string | null;

@@ -2,11 +2,14 @@ import { createGroq } from "@ai-sdk/groq";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText, embed } from "ai";
 import type { EmbeddingModel, LanguageModel } from "ai";
 import { env } from "~/env";
+import { db } from "./db";
+import { createComposioClient } from "./composio";
 
-// Chat / agent calls run on Groq by default (free, no credit card required),
-// with an optional local Ollama backend users can select for private chat.
+// Chat / agent calls run on a cloud LLM (free, no credit card required):
+// OpenAI gpt-4o-mini if a key is set, else NVIDIA NIM (128k context), else Groq.
 // Embeddings run on Google Gemini, since Groq has no embedding models.
 // This replaces the Vercel AI Gateway path, which requires a card on file.
 
@@ -45,13 +48,6 @@ const groq = createGroq({
 });
 const google = createGoogleGenerativeAI({
   apiKey: env.GOOGLE_GENERATIVE_AI_API_KEY,
-});
-
-// Local models via Ollama's OpenAI-compatible endpoint (http://localhost:11434/v1).
-// No API key needed - runs entirely on the user's machine/GPU.
-const ollama = createOpenAICompatible({
-  name: "ollama",
-  baseURL: env.OLLAMA_BASE_URL,
 });
 
 // OpenAI (optional). When a key is set, Cloud chat uses gpt-4o-mini: cheap,
@@ -107,15 +103,12 @@ const EMBEDDING_MODEL = "gemini-embedding-001";
 const EMBEDDING_DIMENSIONS = 1024;
 
 /**
- * Resolve a chat/agent language model from the per-instance selection.
- * A "local-*" selection routes to Ollama (on-device); anything else (including
- * legacy "claude-*" ids) routes to Groq cloud.
+ * Resolve the cloud chat/agent language model.
+ * Preference order: OpenAI gpt-4o-mini > NVIDIA NIM (free, 128k) > Groq.
+ * The optional argument is accepted for call-site compatibility but ignored —
+ * model selection is environment-driven, not per-instance.
  */
-export function chatModel(storedModel?: string): LanguageModel {
-  if (storedModel?.startsWith("local")) {
-    return ollama(env.OLLAMA_MODEL);
-  }
-  // Cloud preference: OpenAI > NVIDIA NIM (free, 128k context) > Groq.
+export function chatModel(_storedModel?: string): LanguageModel {
   if (openai) {
     return openai(OPENAI_MODEL);
   }
@@ -134,3 +127,72 @@ export function embeddingModel(): EmbeddingModel {
 export const embeddingProviderOptions = {
   google: { outputDimensionality: EMBEDDING_DIMENSIONS },
 } as const;
+
+/* ---- Intelligence-engine client surface (used by src/founderops/engine) ---- */
+
+// Raw text LLM call (NIM via chatModel). Used by the extractor + brief/weekly prompts.
+export async function callLLM(
+  systemPrompt: string,
+  userPrompt: string,
+  options?: { temperature?: number; maxTokens?: number; jsonMode?: boolean },
+): Promise<string> {
+  try {
+    const { text } = await generateText({
+      model: chatModel(),
+      system: systemPrompt,
+      prompt: userPrompt,
+      temperature: options?.temperature ?? 0.1,
+      maxOutputTokens: options?.maxTokens ?? 4096,
+    });
+    return text;
+  } catch (error) {
+    console.error("[callLLM] failed:", error);
+    return "[]"; // safe fallback for JSON-expecting callers
+  }
+}
+
+// Embedding for the record linker.
+export async function generateEmbedding(text: string): Promise<number[]> {
+  try {
+    const { embedding } = await embed({
+      model: embeddingModel(),
+      value: text,
+      providerOptions: embeddingProviderOptions,
+    });
+    return embedding;
+  } catch {
+    return [];
+  }
+}
+
+// Execute a Composio tool for a specific instance's connected account.
+// The ingestion adapters call this to pull real activity (Gmail/Slack/etc.).
+// Returns {} on ANY failure (toolkit not connected, auth missing, network error)
+// so a single unconnected source degrades to a no-op instead of crashing the
+// whole ingestion cycle.
+export async function callTool(
+  instanceId: string,
+  toolName: string,
+  args: Record<string, unknown>,
+): Promise<unknown> {
+  try {
+    const inst = await db.composioClawInstance.findUnique({
+      where: { id: instanceId },
+      select: { userId: true },
+    });
+    if (!inst) return {};
+
+    const composio = createComposioClient();
+    const tools = await composio.tools.get(inst.userId, { tools: [toolName] });
+    const tool = tools[toolName];
+    if (!tool?.execute) return {}; // toolkit not connected for this user
+
+    return await tool.execute(args, {
+      toolCallId: `ingest-${toolName}`,
+      messages: [],
+    });
+  } catch (error) {
+    console.error(`[callTool] ${toolName} failed:`, error);
+    return {};
+  }
+}

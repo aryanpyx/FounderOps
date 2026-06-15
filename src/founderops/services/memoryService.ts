@@ -1,4 +1,4 @@
-import { MemoryItem, MemoryType } from '../types';
+import type { MemoryItem, MemoryType } from '../types';
 import { fetchMemories } from './_data';
 
 type GraphNode = {

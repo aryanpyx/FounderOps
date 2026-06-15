@@ -18,7 +18,8 @@ const code = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "trustclaw",
+  title: "FounderOps — AI Chief of Staff",
+  description: "The typed memory layer for founders. Decisions, commitments, blockers and metrics, captured with provenance.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

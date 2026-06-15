@@ -23,7 +23,7 @@ import {
   CartesianGrid,
   Cell
 } from 'recharts';
-import { analyticsService, AnalyticsSummary } from '@/services/analyticsService';
+import { analyticsService, type AnalyticsSummary } from '@/services/analyticsService';
 
 export default function FounderInsights() {
   const [data, setData] = useState<AnalyticsSummary | null>(null);

@@ -13,7 +13,6 @@ import {
   TrendingUp, 
   Activity, 
   Settings,
-  Brain,
   ShieldCheck,
   Mail,
   FolderKanban,
@@ -21,6 +20,7 @@ import {
   Boxes
 } from 'lucide-react';
 import Slack from '@/components/icons/Slack';
+import { FounderOpsLogo } from '@/components/FounderOpsLogo';
 import { analyticsService } from '@/services/analyticsService';
 
 export default function Sidebar() {
@@ -74,14 +74,8 @@ export default function Sidebar() {
   return (
     <aside className="w-64 border-r border-border bg-card flex flex-col h-screen sticky top-0 shrink-0 text-foreground">
       {/* Brand Header */}
-      <div className="h-16 px-6 border-b border-border flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
-          <Brain className="w-4 h-4 text-white" />
-        </div>
-        <div>
-          <h1 className="font-bold text-sm leading-none tracking-wide text-white">FounderOps AI</h1>
-          <span className="text-[10px] text-muted-foreground font-mono">v1.0 (Composio Ingest)</span>
-        </div>
+      <div className="h-16 px-5 border-b border-border flex items-center">
+        <FounderOpsLogo size="md" />
       </div>
 
       {/* Nav Content */}

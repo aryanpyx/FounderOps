@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { TrustClawBrand } from "~/app/_components/trustclaw-brand";
+import { FounderOpsLogo } from "~/founderops/components/FounderOpsLogo";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -69,8 +69,8 @@ export function LoginPage({ firstTime = false }: LoginPageProps) {
   return (
     <div className="bg-background flex min-h-screen flex-col items-center justify-center">
       <div className="mx-auto w-full max-w-sm px-4">
-        <div className="mb-8 flex justify-center">
-          <TrustClawBrand size="lg" logoLink="/" />
+        <div className="mb-8 flex flex-col items-center gap-2 text-center">
+          <FounderOpsLogo size="lg" showTagline />
         </div>
 
         <div className="bg-card rounded-lg border p-6 shadow-sm">

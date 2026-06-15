@@ -1,102 +1,35 @@
 "use client";
 
-import { useState } from "react";
-import type { z } from "zod";
-import { Loader2 } from "lucide-react";
-import { trpc } from "~/clients/trpc";
-import { allowedAnthropicModelSchema } from "~/server/api/routers/trustclaw/createInstance.schema";
-import { Button } from "~/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
+import { Cloud } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { Label } from "~/components/ui/label";
-import {
-  showSuccessToast,
-  trpcToastOnError,
-} from "~/components/core/toast-notifications";
-
-const MODELS = [
-  {
-    value: "groq-cloud",
-    label: "Cloud (NVIDIA · Llama 3.3 70B)",
-    description: "Fast & capable, 128k context, runs in the cloud",
-  },
-  {
-    value: "local-ollama",
-    label: "Local (Ollama · on your machine)",
-    description: "Private, runs on your GPU — needs Ollama",
-  },
-] as const;
-
-type AllowedModel = z.infer<typeof allowedAnthropicModelSchema>;
 
 interface ModelSettingsProps {
   currentModel: string;
 }
 
-export function ModelSettings({ currentModel }: ModelSettingsProps) {
-  const parsed = allowedAnthropicModelSchema.catch("groq-cloud").parse(currentModel);
-  const [selectedModel, setSelectedModel] = useState<AllowedModel>(parsed);
-  const utils = trpc.useUtils();
-
-  const updateSettings = trpc.trustclaw.updateSettings.useMutation({
-    onSuccess: () => {
-      showSuccessToast("Model updated");
-      void utils.trustclaw.getInstance.invalidate();
-    },
-    onError: trpcToastOnError,
-  });
-
-  const hasChanges = selectedModel !== currentModel;
-
+// Model selection is environment-driven (cloud only). The provider is chosen by
+// which API key is configured: OpenAI gpt-4o-mini > NVIDIA NIM > Groq.
+export function ModelSettings({ currentModel: _currentModel }: ModelSettingsProps) {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Model</CardTitle>
         <CardDescription>
-          Choose whether your assistant runs in the cloud or locally
+          Your assistant runs on a managed cloud LLM
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label>Model</Label>
-          <Select
-            value={selectedModel}
-            onValueChange={(val) => {
-              const model = allowedAnthropicModelSchema.safeParse(val);
-              if (model.success) setSelectedModel(model.data);
-            }}
-          >
-            <SelectTrigger className="w-full sm:w-72">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {MODELS.map((m) => (
-                <SelectItem key={m.value} value={m.value}>
-                  <span>{m.label}</span>
-                  <span className="ml-2 text-muted-foreground">
-                    - {m.description}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <CardContent>
+        <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/40 p-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
+            <Cloud className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">Cloud · NVIDIA NIM (Kimi K2.6 / Llama 3.3 70B)</p>
+            <p className="text-xs text-muted-foreground">
+              128k context · free tier · no setup required
+            </p>
+          </div>
         </div>
-        <Button
-          variant="outline"
-          disabled={!hasChanges || updateSettings.isPending}
-          onClick={() =>
-            void updateSettings.mutateAsync({ anthropicModel: selectedModel })
-          }
-        >
-          {updateSettings.isPending ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            "Save"
-          )}
-        </Button>
       </CardContent>
     </Card>
   );

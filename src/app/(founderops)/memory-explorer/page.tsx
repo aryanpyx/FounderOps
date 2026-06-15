@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import Slack from '@/components/icons/Slack';
 import { memoryService } from '@/services/memoryService';
-import { MemoryItem, MemoryType, SourceSystem } from '@/types';
+import type { MemoryItem, MemoryType, SourceSystem } from '@/types';
 import MemoryDetailPanel from '@/components/MemoryDetailPanel';
 
 export default function MemoryExplorer() {

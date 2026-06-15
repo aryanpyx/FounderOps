@@ -2,6 +2,11 @@ import { PrismaClient } from "~/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { env } from "~/env";
 
+// Re-exported so the intelligence engine can reach Prisma types/helpers through
+// its single db gateway (used by the linker and extractor for typed rows + Json).
+export { Prisma } from "~/generated/prisma/client";
+export type { FounderMemory as FounderMemoryRecord } from "~/generated/prisma/client";
+
 function ensureVerifyFullSsl(url: string): string {
   const parsed = new URL(url);
   if (parsed.searchParams.get("sslmode") !== "verify-full") {

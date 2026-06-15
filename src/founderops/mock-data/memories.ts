@@ -1,4 +1,4 @@
-import { MemoryItem, Decision, Commitment, Blocker, Metric, Provenance } from '../types';
+import type { MemoryItem, Decision, Commitment, Blocker, Metric, Provenance } from '../types';
 
 // Helper to construct ISO timestamps relative to current time for realism
 const daysAgo = (days: number, hours = 10): string => {

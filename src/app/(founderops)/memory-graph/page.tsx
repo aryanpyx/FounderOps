@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { 
-  ReactFlow, 
-  Controls, 
-  Background, 
-  Handle, 
+import {
+  ReactFlow,
+  Controls,
+  Background,
+  Handle,
   Position,
-  NodeProps,
-  Node,
-  Edge
+  type NodeProps,
+  type Node,
+  type Edge
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -29,7 +29,7 @@ import {
 import Slack from '@/components/icons/Slack';
 import { memoryService } from '@/services/memoryService';
 import MemoryDetailPanel from '@/components/MemoryDetailPanel';
-import { SourceSystem } from '@/types';
+import type { SourceSystem } from '@/types';
 
 // Custom Node Component to display premium styled elements
 function MemoryNode({ data }: any) {

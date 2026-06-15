@@ -27,8 +27,8 @@ import {
   ResponsiveContainer, 
   CartesianGrid 
 } from 'recharts';
-import { dashboardService, DashboardSummary } from '@/services/dashboardService';
-import { MemoryItem, SourceSystem } from '@/types';
+import { dashboardService, type DashboardSummary } from '@/services/dashboardService';
+import type { MemoryItem, SourceSystem } from '@/types';
 import MemoryDetailPanel from '@/components/MemoryDetailPanel';
 
 export default function Dashboard() {
@@ -104,7 +104,7 @@ export default function Dashboard() {
           <ShieldCheck className="w-4 h-4 text-emerald-400 animate-pulse-subtle" />
           <span className="text-muted-foreground">Secure Execution Sandbox Active</span>
           <span className="font-mono text-[10px] bg-emerald-500/25 text-emerald-400 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">
-            TrustClaw OK
+            Engine Live
           </span>
         </div>
       </div>

@@ -38,12 +38,6 @@ export const env = createEnv({
     // over Groq when set. Get one at https://build.nvidia.com (key starts nvapi-).
     NVIDIA_API_KEY: z.string().optional(),
 
-    // Local LLM via Ollama (optional - powers the "Local" model choice).
-    // Use 127.0.0.1 (not localhost) so Node doesn't resolve to IPv6 ::1,
-    // which Ollama doesn't listen on (causes ECONNREFUSED ::1:11434).
-    OLLAMA_BASE_URL: z.string().url().default("http://127.0.0.1:11434/v1"),
-    OLLAMA_MODEL: z.string().default("qwen2.5:3b"),
-
     // Telegram bot (optional - Telegram features disabled when missing)
     TELEGRAM_BOT_TOKEN: z.string().optional(),
     TELEGRAM_BOT_USERNAME: z.string().optional(),
@@ -87,8 +81,6 @@ export const env = createEnv({
     GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     NVIDIA_API_KEY: process.env.NVIDIA_API_KEY,
-    OLLAMA_BASE_URL: process.env.OLLAMA_BASE_URL,
-    OLLAMA_MODEL: process.env.OLLAMA_MODEL,
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
     TELEGRAM_BOT_USERNAME: process.env.TELEGRAM_BOT_USERNAME,
     TELEGRAM_WEBHOOK_SECRET: process.env.TELEGRAM_WEBHOOK_SECRET,

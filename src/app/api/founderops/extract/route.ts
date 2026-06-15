@@ -1,6 +1,6 @@
 import { generateText } from "ai";
 import { auth } from "~/server/auth";
-import { db } from "~/server/clients/db";
+import { db, Prisma } from "~/server/clients/db";
 import { createComposioClient } from "~/server/clients/composio";
 import { chatModel } from "~/server/clients/ai";
 
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
           author: e.author ?? "",
           messageId: e.messageId ?? null,
           linkToSource: e.linkToSource ?? null,
-          details: e.details ?? {},
+          details: (e.details ?? {}) as Prisma.InputJsonValue,
         },
       });
       inserted++;

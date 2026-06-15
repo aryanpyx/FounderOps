@@ -1,4 +1,4 @@
-import { MemoryItem } from '../types';
+import type { MemoryItem } from '../types';
 
 export interface ToolCall {
   name: string;
