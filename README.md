@@ -14,6 +14,10 @@
 
 **Your startup's institutional memory, built automatically.** FounderOps reads your email, calendar, Slack, and chat, and turns the noise into **typed, sourced records** — every Decision, Commitment, Blocker, and Metric — so nothing important is ever lost in a thread again.
 
+<br />
+
+<img src="public/demo.png" alt="FounderOps product demo" width="900" />
+
 </div>
 
 ---
