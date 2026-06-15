@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, 
   MessageSquare, 
@@ -18,7 +18,8 @@ import {
   FolderKanban,
   CheckSquare,
   Boxes,
-  History
+  History,
+  LogOut
 } from 'lucide-react';
 import Slack from '@/components/icons/Slack';
 import { FounderOpsLogo } from '@/components/FounderOpsLogo';
@@ -27,8 +28,13 @@ import { analyticsService } from '@/services/analyticsService';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: sessionData } = authClient.useSession();
   const user = sessionData?.user;
+  const handleLogout = async () => {
+    await authClient.signOut();
+    router.push('/login');
+  };
   const initials = (user?.name ?? user?.email ?? 'F')
     .split(/[\s@.]+/)
     .filter(Boolean)
@@ -233,8 +239,15 @@ export default function Sidebar() {
             <p className="text-xs font-semibold text-white truncate leading-none mb-0.5">{user?.name ?? 'Founder'}</p>
             <p className="text-[10px] text-muted-foreground truncate leading-none">{user?.email ?? 'Signed in'}</p>
           </div>
-          <div className="flex items-center" title="Secured session">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <div className="flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" aria-label="Secured session" />
+            <button
+              onClick={handleLogout}
+              title="Sign out"
+              className="p-1.5 rounded-md text-muted-foreground hover:text-white hover:bg-border/50 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>
