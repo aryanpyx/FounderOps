@@ -24,7 +24,7 @@ export function ModelSettings({ currentModel: _currentModel }: ModelSettingsProp
             <Cloud className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <p className="text-sm font-medium">Cloud · NVIDIA NIM (Kimi K2.6 / Llama 3.3 70B)</p>
+            <p className="text-sm font-medium">Cloud · NVIDIA NIM (GPT-OSS 120B)</p>
             <p className="text-xs text-muted-foreground">
               128k context · free tier · no setup required
             </p>
