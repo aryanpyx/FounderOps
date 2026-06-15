@@ -1,11 +1,87 @@
 # FounderOps AI
 
-**The memory layer for startups — never lose a decision, commitment, blocker, or metric.**
+**The memory layer for founders — never lose a decision, commitment, blocker, or metric.**
 
-FounderOps is an AI operating system for founders, built on top of **TrustClaw** (Composio). It turns scattered startup activity (Gmail, Calendar, Tasks, Slack, chat) into **typed, sourced memory** — Decisions, Commitments, Blockers, Metrics — and answers questions over it with full provenance. The polished FounderOps UI (cockpit, ask, memory explorer, memory graph, insights) is wired to a real agent that runs **NVIDIA NIM** for chat and **Google Gemini** for embeddings (no credit card required), with all integrations brokered securely through TrustClaw + Composio.
+FounderOps turns scattered startup activity — email, calendar, Slack, Notion, and chat — into **typed, sourced memory**: every **Decision**, **Commitment**, **Blocker**, and **Metric**, captured automatically with full provenance, then surfaced as daily briefs, weekly reviews, decision recovery, and a live knowledge graph.
 
-- **Engine integration?** See [`FOUNDEROPS_ENGINE_CONTRACT.md`](./FOUNDEROPS_ENGINE_CONTRACT.md) — how to write records the UI understands.
-- The rest of this README is the underlying TrustClaw platform.
+It is built on **TrustClaw** (Composio's self-hostable agent) for secure, OAuth-brokered tool access, and runs entirely on **free, no-credit-card LLMs** — **NVIDIA NIM** for chat/reasoning/extraction and **Google Gemini** for embeddings.
+
+> Tell it — or email it — *"We're pushing launch to July 5 because Stripe billing is blocked; I'll update investors Friday; MRR is up 21% to $5.1k"* and FounderOps extracts a **Decision**, a **Blocker**, a **Commitment**, and a **Metric**, links them into the graph, and remembers — so months later you can ask *"why did we delay launch?"* and get the real answer **with citations**.
+
+- **Engine integration contract:** [`FOUNDEROPS_ENGINE_CONTRACT.md`](./FOUNDEROPS_ENGINE_CONTRACT.md) — the record shape the UI understands.
+- The lower half of this README documents the underlying **TrustClaw** platform.
+
+## ✨ What's inside
+
+| Capability | What it does |
+|---|---|
+| 🧠 **Typed memory** | Every record is a Decision / Commitment / Blocker / Metric with source, author, timestamp, and a link back to the original (email/Slack/chat). |
+| 💬 **Ask FounderOps** | A real agent (NIM + Composio tools) that **acts** on your tools (send mail, create events) **and** answers from memory **with citations**. A persistent tool-execution panel shows every call, its args, and result. |
+| 📰 **Daily Brief / Weekly Review** | One click **syncs fresh activity from your connected tools**, then synthesizes an opinionated brief from your typed memory — priority-grouped (🔴 High / 🟡 Needs Attention). |
+| 🕰 **Decision Recovery** | *"Why did we decide X?"* — reconstructs the reasoning from the decision plus its linked blockers and metrics, with citations. |
+| 🕸 **Memory Graph** | Records auto-link (Decision ↔ Blocker / Metric / Commitment) by keyword & entity overlap into a real, navigable knowledge graph. |
+| ⏰ **Passive ingest** | A **daily cron** pulls fresh activity from your tools, filters signal from noise, extracts typed records, and links them — **the memory builds itself.** |
+| 📊 **Cockpit / Explorer / Insights** | Real-data dashboard, searchable memory explorer, and analytics — all from your live records. |
+
+## 🏛 Architecture
+
+```
+   Connected tools (Composio OAuth)         Frontend — Next.js 15 + React 19
+ Gmail · Calendar · Slack · Notion ───┐     cockpit · ask · brief · graph · explorer
+ Sheets · Drive · Docs · Tasks        │                    │
+                ▲                     │                    ▼
+                │              ┌───────┴──── Intelligence Engine ───────────┐
+                │              │  ingest → signal-filter → extract → link → │
+                │              │  prompts (brief / weekly / decision-recover)│
+                │              └───────────────────┬─────────────────────────┘
+                │                          ┌────────┴────────┐
+                │                          ▼                 ▼
+                │            Postgres + pgvector        TrustClaw agent
+                │            (typed memory + graph)     (tools + scheduler / cron)
+                └──────────────────◀───────────────────────┘
+                       daily cron passively ingests from the same tools
+```
+
+**Flow:** the founder works in the Next.js UI → the **Intelligence Engine** (signal-filter → LLM extraction → record-linker) converts raw activity into **typed memory** in Postgres/pgvector → the **TrustClaw agent** brokers every tool call through **Composio** (OAuth, sandboxed execution) → a **daily cron** runs the same pipeline passively so memory accrues on its own.
+
+## ⚙️ The Intelligence Engine — `src/founderops/engine/`
+
+| Module | Job |
+|---|---|
+| `ingest/*` | 5 source adapters (Gmail, Slack, Notion, Calendar, Stripe) → normalized events via Composio |
+| `signal-filter.ts` | Drops noise (newsletters, notifications); keeps genuine founder signals |
+| `extractor.ts` | LLM → validated JSON → typed `FounderMemory` rows |
+| `linker.ts` | Keyword / entity overlap → graph edges (`relatedIds` + typed `blockerIds`/`metricIds`) |
+| `orchestrator.ts` | Chains ingest → filter → extract → link with per-step error isolation |
+| `prompts/*` | `daily-brief`, `weekly-review`, `decision-recovery` generators |
+| `scheduler.ts` | Cron cadence constants |
+
+## 🔌 FounderOps API routes — `src/app/api/founderops/`
+
+| Route | Purpose |
+|---|---|
+| `POST /ask` | Agent run → answer + tool calls + **citations** + captured memory |
+| `GET  /memories` | Typed memory for the signed-in instance |
+| `POST /extract` | One-shot Gmail → typed memory |
+| `POST /engine/ingest` | Full ingestion cycle (session **or** `CRON_SECRET`) |
+| `POST /engine/brief`, `/engine/weekly` | Daily brief / weekly review |
+| `POST /engine/recover` | Decision recovery |
+| `GET  /api/cron/founderops` | **Daily passive ingest** for every instance (Vercel cron, `CRON_SECRET`) |
+
+## 🆓 Model stack — free, no credit card
+
+| Layer | Provider | Notes |
+|---|---|---|
+| Chat / reasoning / extraction | **NVIDIA NIM** | `build.nvidia.com` — 128k context, no card (`nvapi-…`) |
+| Embeddings | **Google Gemini** | `aistudio.google.com` — 1024-dim |
+| Tool access | **Composio** | OAuth-brokered, sandboxed execution |
+| Fallback chat | Groq (rotating keys) / OpenAI | optional |
+
+> Cloud only — model selection is environment-driven (`OPENAI_API_KEY` → NVIDIA → Groq). There is no local/Ollama path.
+
+## 🔗 Data sources
+
+Connected per-user through Composio. The engine **ingests** memory from **Gmail, Google Calendar, Slack, and Notion**; the agent can additionally **act on** Google Tasks, Docs, Sheets, Drive, and Meet. (Google OAuth in *Testing* mode only authorizes added test users — connect tools with a whitelisted Google account, or publish the OAuth app.)
 
 ## 🚀 Quickstart (local)
 
@@ -33,9 +109,21 @@ Requires **Node ≥ 22.12** and **pnpm**. Postgres with the **pgvector** extensi
 | `COMPOSIO_TOOLKITS` | optional | Comma-separated toolkits to load per request, e.g. `GMAIL,GOOGLECALENDAR,GOOGLETASKS` |
 | `REDIS_URL`, `TELEGRAM_*` | optional | Resumable streams / Telegram bot |
 
-**Model routing** (`src/server/clients/ai.ts`): cloud chat prefers OpenAI → NVIDIA NIM → Groq; embeddings use Gemini; a `local-ollama` model selection runs a local Ollama model. Pick the cloud-vs-local model in **Settings**.
+**Model routing** (`src/server/clients/ai.ts`): cloud chat prefers OpenAI → NVIDIA NIM → Groq; embeddings use Gemini. Cloud only — no local model path.
 
-After connecting Gmail/Calendar/etc. in **Toolkits**, open **Ask FounderOps** and tell it a decision (e.g. *"Remember: we delayed launch a week due to 2 auth bugs"*) — it's captured as typed memory and appears in the cockpit, explorer, and graph.
+After connecting Gmail/Calendar/etc. in **Toolkits**, either:
+- open **Ask FounderOps** and tell it a decision (*"Remember: we delayed launch a week due to 2 auth bugs"*), or
+- click **Sync & generate** on the **Daily Brief** to passively pull + extract typed memory from your inbox & calendar.
+
+Either way it's captured as typed memory and appears in the cockpit, explorer, and graph.
+
+## ☁️ Deploy (Vercel)
+
+1. Push this app to a GitHub repo and import it into Vercel.
+2. **Settings → Git → Production Branch** → set to your deploy branch (so each push auto-deploys).
+3. Add the env vars above — **`NEXT_PUBLIC_APP_URL` must be set** to your production URL (the build fails if it's empty).
+4. Node **22.x**. The build runs `prisma generate && prisma db push && next build`, so `DATABASE_URL` must be present at build time.
+5. `vercel.json` registers two **daily** crons (Hobby plan caps cron at daily — which also keeps free-tier LLM keys well under quota): the TrustClaw agent cron and `/api/cron/founderops` (passive ingest).
 
 ---
 
