@@ -50,12 +50,14 @@ export const queryService = {
         answer?: string;
         toolCalls?: ToolCall[];
         captured?: number;
+        sources?: MemoryItem[];
       };
       return {
         answer: data.answer?.trim() || 'The agent returned no answer.',
         ...empty,
         toolCalls: data.toolCalls ?? [],
         captured: data.captured ?? 0,
+        sources: data.sources ?? [],
       };
     } catch {
       return {

@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/trustclaw",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/founderops",
+      "schedule": "0 6 * * *"
     }
   ]
 }

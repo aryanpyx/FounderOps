@@ -17,14 +17,24 @@ import {
   Mail,
   FolderKanban,
   CheckSquare,
-  Boxes
+  Boxes,
+  History
 } from 'lucide-react';
 import Slack from '@/components/icons/Slack';
 import { FounderOpsLogo } from '@/components/FounderOpsLogo';
+import { authClient } from '~/clients/auth/react';
 import { analyticsService } from '@/services/analyticsService';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { data: sessionData } = authClient.useSession();
+  const user = sessionData?.user;
+  const initials = (user?.name ?? user?.email ?? 'F')
+    .split(/[\s@.]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? '')
+    .join('') || 'F';
   const [healthScore, setHealthScore] = useState<number>(85);
   const [loadingHealth, setLoadingHealth] = useState<boolean>(true);
 
@@ -52,6 +62,7 @@ export default function Sidebar() {
   const secondaryNavItems = [
     { name: 'Daily Brief', path: '/daily-brief', icon: FileText },
     { name: 'Weekly Review', path: '/weekly-review', icon: CalendarDays },
+    { name: 'Decision Recovery', path: '/recover', icon: History },
     { name: 'Founder Insights', path: '/insights', icon: TrendingUp },
   ];
 
@@ -213,9 +224,15 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* Brand Card */}
-        <div className="flex items-center justify-between gap-3">
-          <FounderOpsLogo size="md" />
+        {/* User Card (real logged-in session) */}
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center font-bold text-xs text-indigo-300 shrink-0">
+            {initials}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-white truncate leading-none mb-0.5">{user?.name ?? 'Founder'}</p>
+            <p className="text-[10px] text-muted-foreground truncate leading-none">{user?.email ?? 'Signed in'}</p>
+          </div>
           <div className="flex items-center" title="Secured session">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
           </div>

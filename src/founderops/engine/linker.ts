@@ -15,9 +15,13 @@
  * Strategy 4 (temporal clustering) works without pgvector.
  */
 
-import { db } from "../../server/clients/db";
+import { db, Prisma } from "../../server/clients/db";
 import type { FounderMemoryRecord } from "../../server/clients/db";
 import { logger } from "./types";
+
+// How far back to consider records for linking. Generous so already-captured
+// memory (e.g. from /ask before the linker ran) still gets connected.
+const LINK_WINDOW_MS = 90 * 24 * 60 * 60 * 1000;
 
 /* ------------------------------------------------------------------ */
 /*  Main Linking Function                                              */
@@ -36,34 +40,18 @@ export async function linkRecords(instanceId: string): Promise<number> {
 
   let totalLinks = 0;
 
-  // --- Strategy 1 & 2: Semantic similarity linking ---
-  // TODO: Implement when pgvector is enabled on the database.
-  //
-  // These strategies use cosine similarity between record embeddings
-  // to find related records. The pseudo-code:
-  //
-  // Strategy 1: Blocker → Decision
-  //   For each new Decision, find Blockers with embedding similarity > 0.75
-  //   → Add Blocker ID to Decision's relatedIds and details.blockerIds
-  //   → Add Decision ID to Blocker's relatedIds
-  //
-  // Strategy 2: Metric → Decision
-  //   For each new Metric, find Decisions within 7 days with similarity > 0.7
-  //   → Add Metric ID to Decision's relatedIds and details.metricIds
-  //   → Add Decision ID to Metric's relatedIds
-  //
-  // Implementation requires:
-  // 1. pgvector extension: CREATE EXTENSION IF NOT EXISTS vector;
-  // 2. An embedding column on FounderMemory
-  // 3. Raw queries like:
-  //    SELECT id FROM "FounderMemory"
-  //    WHERE instance_id = ${instanceId}
-  //      AND type = 'Blocker'
-  //      AND embedding <=> ${embedding} < 0.25
-  //    ORDER BY embedding <=> ${embedding}
-  //    LIMIT 5
-  //
-  logger.info("Record linker: semantic linking skipped (pgvector not configured)");
+  // --- Strategy 1 & 2: Decision → Blocker / Metric keyword linking ---
+  // Connects each Decision to the Blockers it resolves and Metrics it responded
+  // to, via salient keyword overlap. Populates both relatedIds (graph edges) and
+  // details.blockerIds / details.metricIds (typed links used by briefs + graph).
+  try {
+    const decisionLinks = await linkDecisionsToContext(instanceId);
+    totalLinks += decisionLinks;
+  } catch (error) {
+    logger.error("Record linker: decision linking failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 
   // --- Strategy 3: Commitment → Decision/Blocker keyword matching ---
   try {
@@ -98,26 +86,23 @@ export async function linkRecords(instanceId: string): Promise<number> {
  * that share significant keywords with the commitment's task description.
  */
 async function linkCommitmentsToSources(instanceId: string): Promise<number> {
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const since = new Date(Date.now() - LINK_WINDOW_MS);
 
-  // Get recent commitments
   const commitments = await db.founderMemory.findMany({
     where: {
       instanceId,
       type: "Commitment",
-      occurredAt: { gte: oneDayAgo },
+      occurredAt: { gte: since },
     },
   });
 
   if (commitments.length === 0) return 0;
 
-  // Get all decisions and blockers from the last 30 days to match against
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const targets = await db.founderMemory.findMany({
     where: {
       instanceId,
       type: { in: ["Decision", "Blocker"] },
-      occurredAt: { gte: thirtyDaysAgo },
+      occurredAt: { gte: since },
     },
   });
 
@@ -155,12 +140,12 @@ async function linkCommitmentsToSources(instanceId: string): Promise<number> {
  * are likely related. Group and link them.
  */
 async function linkTemporalClusters(instanceId: string): Promise<number> {
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const since = new Date(Date.now() - LINK_WINDOW_MS);
 
   const recentRecords = await db.founderMemory.findMany({
     where: {
       instanceId,
-      occurredAt: { gte: oneDayAgo },
+      occurredAt: { gte: since },
     },
   });
 
@@ -205,6 +190,88 @@ async function linkTemporalClusters(instanceId: string): Promise<number> {
           linkCount++;
         }
       }
+    }
+  }
+
+  return linkCount;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Strategy 1 & 2: Decision → Blocker / Metric                        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * For each Decision, find Blockers and Metrics that share salient keywords and
+ * link them. Writes relatedIds (generic graph edges) bidirectionally AND the
+ * Decision's details.blockerIds / details.metricIds (typed, colored edges).
+ */
+async function linkDecisionsToContext(instanceId: string): Promise<number> {
+  const since = new Date(Date.now() - LINK_WINDOW_MS);
+
+  const decisions = await db.founderMemory.findMany({
+    where: { instanceId, type: "Decision", occurredAt: { gte: since } },
+  });
+  if (decisions.length === 0) return 0;
+
+  const context = await db.founderMemory.findMany({
+    where: {
+      instanceId,
+      type: { in: ["Blocker", "Metric"] },
+      occurredAt: { gte: since },
+    },
+  });
+  if (context.length === 0) return 0;
+
+  let linkCount = 0;
+
+  for (const decision of decisions) {
+    const decisionKeywords = extractKeywords(decision.title + " " + decision.content);
+
+    const details =
+      decision.details && typeof decision.details === "object" && !Array.isArray(decision.details)
+        ? { ...(decision.details as Record<string, unknown>) }
+        : {};
+    const blockerIds = new Set<string>(
+      Array.isArray(details.blockerIds) ? (details.blockerIds as string[]) : [],
+    );
+    const metricIds = new Set<string>(
+      Array.isArray(details.metricIds) ? (details.metricIds as string[]) : [],
+    );
+    let detailsChanged = false;
+
+    for (const ctx of context) {
+      if (ctx.id === decision.id) continue;
+      if (decision.relatedIds.includes(ctx.id)) continue;
+
+      const overlap = keywordOverlap(
+        decisionKeywords,
+        extractKeywords(ctx.title + " " + ctx.content),
+      );
+      if (overlap < 2) continue;
+
+      await addBidirectionalLink(decision, ctx);
+      if (ctx.type === "Blocker" && !blockerIds.has(ctx.id)) {
+        blockerIds.add(ctx.id);
+        detailsChanged = true;
+      }
+      if (ctx.type === "Metric" && !metricIds.has(ctx.id)) {
+        metricIds.add(ctx.id);
+        detailsChanged = true;
+      }
+      linkCount++;
+    }
+
+    if (detailsChanged) {
+      await db.founderMemory.update({
+        where: { id: decision.id },
+        data: {
+          details: {
+            ...details,
+            blockerIds: [...blockerIds],
+            metricIds: [...metricIds],
+          } as Prisma.InputJsonValue,
+        },
+      });
     }
   }
 
