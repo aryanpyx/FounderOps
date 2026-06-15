@@ -59,7 +59,7 @@ export default function Sidebar() {
   }, [pathname]);
 
   const primaryNavItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { name: 'Dashboard', path: '/cockpit', icon: LayoutDashboard },
     { name: 'Ask FounderOps', path: '/ask', icon: MessageSquare, badge: 'Ask' },
     { name: 'Memory Explorer', path: '/memory-explorer', icon: Search },
     { name: 'Memory Graph', path: '/memory-graph', icon: Network },
