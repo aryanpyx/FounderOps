@@ -8,9 +8,10 @@ import Sidebar from "@/components/Sidebar";
 export default async function FounderOpsLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // Gate the whole FounderOps product behind auth.
+  // Gate the whole FounderOps product behind auth. Logged-out visitors land on
+  // the public marketing page (/home) — "Launch app" there takes them to login.
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) redirect("/login");
+  if (!session) redirect("/home");
 
   // The agent/memory endpoints are scoped to a ComposioClawInstance. A brand-new
   // user has none yet — send them through onboarding (at /dashboard) to create it
