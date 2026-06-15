@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
@@ -10,8 +10,7 @@ import {
   Network, 
   FileText, 
   CalendarDays, 
-  TrendingUp, 
-  Activity, 
+  TrendingUp,
   Settings,
   ShieldCheck,
   Mail,
@@ -24,7 +23,6 @@ import {
 import Slack from '@/components/icons/Slack';
 import { FounderOpsLogo } from '@/components/FounderOpsLogo';
 import { authClient } from '~/clients/auth/react';
-import { analyticsService } from '@/services/analyticsService';
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -41,22 +39,6 @@ export default function Sidebar() {
     .slice(0, 2)
     .map((p) => p[0]?.toUpperCase() ?? '')
     .join('') || 'F';
-  const [healthScore, setHealthScore] = useState<number>(85);
-  const [loadingHealth, setLoadingHealth] = useState<boolean>(true);
-
-  useEffect(() => {
-    async function loadHealth() {
-      try {
-        const stats = await analyticsService.getAnalyticsSummary();
-        setHealthScore(stats.healthScore);
-      } catch (err) {
-        console.error('Failed to fetch health score for sidebar', err);
-      } finally {
-        setLoadingHealth(false);
-      }
-    }
-    loadHealth();
-  }, [pathname]);
 
   const primaryNavItems = [
     { name: 'Dashboard', path: '/cockpit', icon: LayoutDashboard },
@@ -206,30 +188,7 @@ export default function Sidebar() {
       </div>
 
       {/* Sidebar Footer */}
-      <div className="p-4 border-t border-border bg-card/60 space-y-3">
-        {/* Operational Health Indicator */}
-        <div className="p-3 bg-border/30 border border-border/50 rounded-lg">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1">
-              <Activity className="w-3.5 h-3.5 text-indigo-400" />
-              Ops Health
-            </span>
-            <span className="text-xs font-mono font-bold text-white">
-              {loadingHealth ? '--' : `${healthScore}%`}
-            </span>
-          </div>
-          <div className="w-full h-1 bg-border rounded-full overflow-hidden">
-            <div 
-              className={`h-full transition-all duration-500 rounded-full ${
-                healthScore >= 80 ? 'bg-gradient-to-r from-emerald-500 to-teal-400' :
-                healthScore >= 65 ? 'bg-gradient-to-r from-amber-500 to-orange-400' :
-                'bg-gradient-to-r from-rose-500 to-red-400'
-              }`}
-              style={{ width: `${healthScore}%` }}
-            />
-          </div>
-        </div>
-
+      <div className="p-4 border-t border-border bg-card/60">
         {/* User Card (real logged-in session) */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center font-bold text-xs text-indigo-300 shrink-0">

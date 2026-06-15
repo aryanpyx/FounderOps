@@ -18,15 +18,6 @@ import {
   ArrowRight
 } from 'lucide-react';
 import Slack from '@/components/icons/Slack';
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  ResponsiveContainer, 
-  CartesianGrid 
-} from 'recharts';
 import { dashboardService, type DashboardSummary } from '@/services/dashboardService';
 import type { MemoryItem, SourceSystem } from '@/types';
 import MemoryDetailPanel from '@/components/MemoryDetailPanel';
@@ -166,44 +157,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Main Content Split: Chart & Priorities */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Span: Health Chart */}
-        <div className="lg:col-span-2 p-6 bg-card border border-border/65 rounded-xl space-y-4 glow-indigo">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-sm text-white">Startup Operational Health Score</h3>
-              <p className="text-xs text-muted-foreground">Calculated hourly based on active blockers, resolved actions, and task execution rates.</p>
-            </div>
-            <span className="text-xs font-mono font-semibold text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 border border-indigo-500/25 rounded">
-              Trend: Stable
-            </span>
-          </div>
-
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data.healthTrend} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorHealth" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25}/>
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0.01}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1f1f23" vertical={false} />
-                <XAxis dataKey="date" stroke="#71717a" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="#71717a" fontSize={10} domain={[40, 100]} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#0c0c0e', border: '1px solid #1f1f23', borderRadius: '8px' }} 
-                  labelStyle={{ fontSize: '10px', color: '#a1a1aa', fontFamily: 'monospace' }}
-                  itemStyle={{ fontSize: '11px', color: '#ffffff' }}
-                />
-                <Area type="monotone" dataKey="score" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#colorHealth)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Right Span: Priorities list */}
+      {/* Today's priorities */}
+      <div className="grid grid-cols-1 gap-6">
         <div className="p-6 bg-card border border-border/65 rounded-xl flex flex-col justify-between">
           <div className="space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-border">
