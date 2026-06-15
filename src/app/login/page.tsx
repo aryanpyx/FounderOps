@@ -20,7 +20,7 @@ export default async function Page() {
   }
 
   if (session) {
-    redirect("/ask");
+    redirect("/dashboard");
   }
 
   let firstTime = false;

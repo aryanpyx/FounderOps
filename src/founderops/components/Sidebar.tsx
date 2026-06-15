@@ -42,7 +42,7 @@ export default function Sidebar() {
 
   const primaryNavItems = [
     { name: 'Dashboard', path: '/cockpit', icon: LayoutDashboard },
-    { name: 'Ask FounderOps', path: '/ask', icon: MessageSquare, badge: 'Ask' },
+    { name: 'Agent Chat', path: '/dashboard', icon: MessageSquare, badge: 'Chat' },
     { name: 'Memory Explorer', path: '/memory-explorer', icon: Search },
     { name: 'Memory Graph', path: '/memory-graph', icon: Network },
   ];
@@ -57,7 +57,6 @@ export default function Sidebar() {
   // Real TrustClaw pages: persistent agent chat (with live tool stream), toolkit
   // connections, and settings. These live under /dashboard/* in the same app.
   const workspaceNavItems = [
-    { name: 'Agent Chat', path: '/dashboard', icon: MessageSquare },
     { name: 'Toolkits', path: '/dashboard/toolkits', icon: Boxes },
     { name: 'Settings', path: '/dashboard/settings', icon: Settings },
   ];
