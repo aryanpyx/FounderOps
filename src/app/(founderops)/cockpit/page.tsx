@@ -22,6 +22,7 @@ import { dashboardService, type DashboardSummary } from '@/services/dashboardSer
 import type { MemoryItem, SourceSystem } from '@/types';
 import MemoryDetailPanel from '@/components/MemoryDetailPanel';
 import { NudgesCard } from '@/components/NudgesCard';
+import { MetricIntelCard } from '@/components/MetricIntelCard';
 
 export default function Dashboard() {
   const [data, setData] = useState<DashboardSummary | null>(null);
@@ -101,8 +102,11 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Proactive nudges — the Chief of Staff layer */}
+      {/* Chief of Staff nudges */}
       <NudgesCard onOpen={openMemoryDetails} />
+
+      {/* Wolfram-powered metric intelligence — full-width, prominent */}
+      <MetricIntelCard />
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

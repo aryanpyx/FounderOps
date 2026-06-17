@@ -64,10 +64,21 @@ const nimFetch: typeof fetch = async (input, init) => {
   if (init?.body && typeof init.body === "string") {
     try {
       const body = JSON.parse(init.body) as Record<string, unknown>;
+      let changed = false;
+      // gpt-oss defaults to HIGH reasoning effort. With the full agent system
+      // prompt + tools it reasons for >60s on even a "hi", blowing past Vercel's
+      // function timeout so the stream opens but never emits text ("no response").
+      // "low" keeps replies fast (~1-3s) and still drives tool calls correctly.
+      if (Array.isArray(body.messages)) {
+        body.reasoning_effort = "low";
+        changed = true;
+      }
+      // NIM defaults parallel_tool_calls:true; gpt-oss/llama 400 on multi tool-calls.
       if (Array.isArray(body.tools) && body.tools.length > 0) {
         body.parallel_tool_calls = false;
-        init = { ...init, body: JSON.stringify(body) };
+        changed = true;
       }
+      if (changed) init = { ...init, body: JSON.stringify(body) };
     } catch {
       // non-JSON body - send unchanged
     }

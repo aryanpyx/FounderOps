@@ -188,7 +188,13 @@ export function reconstructMessages(
       .map((r) => r.data);
 
     if (toolParts.length === 0) {
-      result.push({ role: "assistant", content: textContent || "(empty)" });
+      // Skip empty assistant rows entirely. A turn that timed out (e.g. hit the
+      // serverless function limit) leaves a pre-created assistant row with no
+      // content; rendering it as "(empty)" poisons the context - the model
+      // mirrors the empty turns and replies "there's nothing to answer".
+      if (textContent) {
+        result.push({ role: "assistant", content: textContent });
+      }
       continue;
     }
 

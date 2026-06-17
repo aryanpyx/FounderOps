@@ -10,6 +10,7 @@
 [![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![NVIDIA NIM](https://img.shields.io/badge/LLM-NVIDIA%20NIM-76B900?logo=nvidia&logoColor=white)](https://build.nvidia.com)
 [![Composio](https://img.shields.io/badge/Tools-Composio-6366F1)](https://composio.dev)
+[![Wolfram|Alpha](https://img.shields.io/badge/Compute-Wolfram%7CAlpha-DD1100?logo=wolfram&logoColor=white)](https://www.wolfram.com/language/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22C55E)](./LICENSE)
 
 **Your startup's institutional memory, built automatically.** FounderOps reads your email, calendar, Slack, and chat, and turns the noise into **typed, sourced records** — every Decision, Commitment, Blocker, and Metric — so nothing important is ever lost in a thread again.
@@ -68,6 +69,7 @@ Every record carries **provenance** — source, author, timestamp, and a link ba
 | 💬 | **Ask FounderOps** | A real agent (NIM + Composio tools) that **acts** on your tools (send mail, create events) *and* answers from memory **with citations**. A persistent panel streams every tool call, its arguments, and result. |
 | 📰 | **Daily Brief / Weekly Review** | One click **syncs from your connected tools**, then synthesizes an opinionated brief from your memory — priority-grouped (🔴 High · 🟡 Needs attention). |
 | 🕰 | **Decision Recovery** | *"Why did we decide X?"* — reconstructs the reasoning from the decision plus its linked blockers and metrics, with citations. |
+| 🧮 | **Metric Intelligence** (Wolfram&#124;Alpha) | Feeds your captured metrics to **Wolfram&#124;Alpha** for **exact** growth-rate and 6-month forecasts (e.g. MRR $4,200 → $5,100 → **$16,349**), and gives the agent a compute tool so it never guesses a number. |
 | 🕸 | **Memory Graph** | Records auto-link (Decision ↔ Blocker / Metric / Commitment) by keyword & entity overlap into a navigable knowledge graph. |
 | ⏰ | **Passive ingest** | A daily cron pulls fresh activity, filters noise, extracts typed records, and links them — **the memory builds itself.** |
 | 📊 | **Cockpit · Explorer · Insights** | Real-data dashboard, searchable explorer, and analytics — all from live records. |
@@ -142,6 +144,7 @@ Then: connect Gmail / Calendar in **Toolkits**, and either tell **Ask FounderOps
 | `COMPOSIO_TOOLKITS` | optional | Toolkits to load per request, e.g. `GMAIL,GOOGLECALENDAR,SLACK,NOTION` |
 | `GROQ_API_KEY` / `_2` / `_3` | optional | Fallback chat (rotates on rate-limit) |
 | `OPENAI_API_KEY` | optional | If set, cloud chat uses `gpt-4o-mini` |
+| `WOLFRAM_APP_ID` | optional | Enables Wolfram&#124;Alpha exact computation (agent tool + metric forecasts) — free AppID |
 | `REDIS_URL`, `TELEGRAM_*` | optional | Resumable streams / Telegram bot |
 
 Model routing lives in [`src/server/clients/ai.ts`](src/server/clients/ai.ts): cloud chat prefers OpenAI → NVIDIA NIM → Groq; embeddings use Gemini. **Cloud only — there is no local model path.**
@@ -168,6 +171,16 @@ The record shape the UI consumes is documented in [`FOUNDEROPS_ENGINE_CONTRACT.m
 | Embeddings | **Google Gemini** | 1024-dim |
 | Tool access | **Composio** | OAuth-brokered, sandboxed |
 | Fallback chat | Groq (rotating keys) / OpenAI | optional |
+| Exact computation | **Wolfram&#124;Alpha** | optional — grounds the agent's math + metric forecasts |
+
+## Wolfram intelligence
+
+FounderOps captures **Metrics** — so it speaks numbers. [Wolfram&#124;Alpha](https://www.wolfram.com/language/) turns that into **computed** intelligence instead of LLM guesswork:
+
+- **Agent compute tool** — the chat agent calls Wolfram for any quantitative question (*"at 21% MoM from $5,100, when do we cross $20k?"*) and answers with **exact computation**, never a hallucinated figure. Only exposed to the agent when configured.
+- **Metric Intelligence card** (cockpit) — feeds your captured metrics to Wolfram for **growth-rate and 6-month forecasts** (e.g. MRR $4,200 → $5,100 → projected trajectory).
+
+Set a free `WOLFRAM_APP_ID` (LLM API, [developer.wolframalpha.com](https://developer.wolframalpha.com)) to enable. Without it, the feature degrades gracefully — the tool is hidden from the agent and the card shows a connect prompt. Server-only: [`src/server/clients/wolfram.ts`](src/server/clients/wolfram.ts).
 
 ## Data sources
 

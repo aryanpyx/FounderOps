@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import {
   ArrowRight,
   Zap,
@@ -100,14 +100,14 @@ const RECORDS = [
   { icon: TrendingUp, label: 'Metric', text: 'MRR +21% to $5,100', tint: 'text-sky-300 border-sky-500/40 bg-sky-500/10' },
 ];
 
-// Scattered "lost context" thoughts for the struggle scene.
+// Scattered "lost context" thoughts — positioned within the Before panel.
 const CHAOS = [
-  { t: 'what did we decide on pricing?', x: '-58%', y: '-30%', r: -8 },
-  { t: 'that Slack thread from Tuesday…', x: '42%', y: '-38%', r: 7 },
-  { t: 'who owns the investor update?', x: '-46%', y: '28%', r: 6 },
-  { t: 'the metric from the call?', x: '50%', y: '24%', r: -6 },
-  { t: 'why did we delay launch again?', x: '-8%', y: '-46%', r: 3 },
-  { t: 'buried in an email somewhere', x: '6%', y: '40%', r: -4 },
+  { t: 'what did we decide on pricing?', left: '4%', top: '8%', r: -7 },
+  { t: 'that Slack thread from Tuesday…', left: '44%', top: '2%', r: 6 },
+  { t: 'who owns the investor update?', left: '2%', top: '44%', r: 5 },
+  { t: 'the metric from the call?', left: '46%', top: '40%', r: -5 },
+  { t: 'why did we delay launch again?', left: '20%', top: '72%', r: 3 },
+  { t: 'buried in an email somewhere', left: '50%', top: '76%', r: -4 },
 ];
 
 const FEATURES = [
@@ -124,60 +124,68 @@ const SECURITY = [
   { icon: KeyRound, title: 'Your data, your database', body: 'Memory lives in your own Postgres. Disconnect a source and ingestion stops instantly.' },
 ];
 
-/* ── The struggle → success transformation (scroll-pinned) ── */
+/* ── The struggle → success transformation (animated Before / After) ── */
 function TransformScene() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] });
-
-  const chaosOpacity = useTransform(scrollYProgress, [0, 0.38], [1, 0]);
-  const chaosScale = useTransform(scrollYProgress, [0, 0.38], [1, 0.6]);
-  const beforeText = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
-  const captureText = useTransform(scrollYProgress, [0.32, 0.45, 0.6, 0.7], [0, 1, 1, 0]);
-  const orderOpacity = useTransform(scrollYProgress, [0.55, 0.85], [0, 1]);
-  const orderScale = useTransform(scrollYProgress, [0.55, 0.9], [0.9, 1]);
-  const afterText = useTransform(scrollYProgress, [0.7, 0.9], [0, 1]);
-
   return (
-    <section ref={ref} className="relative h-[260vh]">
-      <div className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden px-5">
-        {/* Stage labels */}
-        <motion.span style={{ opacity: beforeText }} className="absolute top-[16%] font-mono text-xs uppercase tracking-[0.3em] text-rose-400/80">
-          Before — context, everywhere and nowhere
-        </motion.span>
-        <motion.span style={{ opacity: captureText }} className="absolute top-[16%] font-mono text-xs uppercase tracking-[0.3em] text-sky-400">
-          FounderOps captures it all
-        </motion.span>
-        <motion.span style={{ opacity: afterText }} className="absolute top-[16%] font-mono text-xs uppercase tracking-[0.3em] text-emerald-400">
-          After — typed, sourced, recalled
-        </motion.span>
-
-        {/* Chaos layer */}
-        <motion.div style={{ opacity: chaosOpacity, scale: chaosScale }} className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          {CHAOS.map((c, i) => (
-            <motion.div
-              key={i}
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 4 + i, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute max-w-[200px] rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs italic text-zinc-500"
-              style={{ transform: `translate(${c.x}, ${c.y}) rotate(${c.r}deg)` }}
-            >
-              {c.t}
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Order layer */}
-        <motion.div style={{ opacity: orderOpacity, scale: orderScale }} className="grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-2">
-          {RECORDS.map((r) => (
-            <div key={r.label} className={`flex items-start gap-2.5 rounded-xl border p-4 ${r.tint}`}>
-              <r.icon className="mt-0.5 h-5 w-5 shrink-0" />
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wide">{r.label}</span>
-                <p className="text-sm text-zinc-100">{r.text}</p>
-              </div>
+    <section className="mx-auto max-w-6xl px-5 py-16">
+      <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[1fr_auto_1fr]">
+        {/* Before — scattered & forgotten */}
+        <Reveal>
+          <div className="relative overflow-hidden rounded-2xl border border-rose-500/20 bg-rose-500/[0.03] p-6">
+            <span className="font-mono text-[11px] uppercase tracking-widest text-rose-400">Before · scattered &amp; forgotten</span>
+            <div className="relative mt-4 h-[260px]">
+              {CHAOS.map((c, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 + i * 0.08, duration: 0.5 }}
+                  className="absolute w-[170px]"
+                  style={{ left: c.left, top: c.top }}
+                >
+                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs italic text-zinc-500" style={{ transform: `rotate(${c.r}deg)` }}>
+                    {c.t}
+                  </div>
+                </motion.div>
+              ))}
             </div>
-          ))}
-        </motion.div>
+          </div>
+        </Reveal>
+
+        {/* FounderOps — the turn */}
+        <Reveal delay={0.2} className="flex items-center justify-center">
+          <div className="flex flex-col items-center gap-2">
+            <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-sky-300">FounderOps</span>
+            <ArrowRight className="hidden h-6 w-6 text-sky-400 lg:block" />
+            <ArrowRight className="h-6 w-6 rotate-90 text-sky-400 lg:hidden" />
+          </div>
+        </Reveal>
+
+        {/* After — typed, sourced, recalled */}
+        <Reveal delay={0.3}>
+          <div className="rounded-2xl border border-blue-500/25 bg-blue-500/[0.04] p-6">
+            <span className="font-mono text-[11px] uppercase tracking-widest text-blue-300">After · typed, sourced, recalled</span>
+            <div className="mt-4 space-y-2.5">
+              {RECORDS.map((r, i) => (
+                <motion.div
+                  key={r.label}
+                  initial={{ opacity: 0, x: 14 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 + i * 0.12, duration: 0.45 }}
+                  className={`flex items-start gap-2.5 rounded-lg border p-3 ${r.tint}`}
+                >
+                  <r.icon className="mt-0.5 h-4 w-4 shrink-0" />
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wide">{r.label}</span>
+                    <p className="text-xs text-zinc-100">{r.text}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -253,6 +261,50 @@ export default function Home() {
             Decisions in Slack. Commitments in email. Metrics on a call. Blockers in someone&apos;s head. Six weeks
             later, nobody remembers <span className="italic text-zinc-300">why</span> — and it&apos;s gone.
           </p>
+        </Reveal>
+
+        {/* ── Demo video + team ── */}
+        <Reveal delay={0.15}>
+          <span className="mt-14 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-zinc-300">
+            <Sparkles className="h-3 w-3 text-sky-400" /> Watch the 5-minute demo
+          </span>
+          <div className="relative left-1/2 mt-6 w-[92vw] max-w-5xl -translate-x-1/2 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] p-2 shadow-2xl shadow-blue-950/40">
+            <video
+              className="aspect-video w-full rounded-2xl bg-black"
+              controls
+              preload="none"
+              playsInline
+              poster="/demo.png"
+            >
+              <source src="/founderops_video.mp4" type="video/mp4" />
+              Your browser doesn&apos;t support embedded video.
+            </video>
+          </div>
+
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <span className="font-mono text-[11px] uppercase tracking-widest text-zinc-500">
+              Built by <span className="text-zinc-300">Team Jaam</span>
+            </span>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {[
+                { name: 'Madhan', role: 'Product' },
+                { name: 'Jaysid', role: 'Engineering' },
+                { name: 'Abhishek', role: 'AI' },
+                { name: 'Abhinand', role: 'Design' },
+              ].map((m) => (
+                <span
+                  key={m.name}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-sm"
+                >
+                  <span className="font-semibold text-white">{m.name}</span>
+                  <span className="text-zinc-500">{m.role}</span>
+                </span>
+              ))}
+            </div>
+            <p className="mt-2 font-mono text-[11px] uppercase tracking-widest text-zinc-500">
+              Powered by TrustClaw · Composio · NVIDIA NIM · Wolfram|Alpha
+            </p>
+          </div>
         </Reveal>
       </section>
 
@@ -355,7 +407,9 @@ export default function Home() {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-10 sm:flex-row">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="FounderOps" className="h-7 w-auto invert mix-blend-screen" />
-          <p className="font-mono text-[11px] uppercase tracking-widest text-zinc-500">The memory layer for founders · built on TrustClaw + Composio</p>
+          <p className="max-w-md text-center font-mono text-[11px] uppercase tracking-widest text-zinc-500">
+            Built by Team Jaam · Powered by TrustClaw, Composio, NVIDIA NIM &amp; Wolfram|Alpha
+          </p>
           <Link href="/login" className="text-sm font-medium text-zinc-300 transition-colors hover:text-white">Launch app →</Link>
         </div>
       </footer>

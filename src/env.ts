@@ -38,6 +38,10 @@ export const env = createEnv({
     // over Groq when set. Get one at https://build.nvidia.com (key starts nvapi-).
     NVIDIA_API_KEY: z.string().optional(),
 
+    // Wolfram|Alpha (optional) - exact computation for the agent + metric forecasts.
+    // Free AppID at https://developer.wolframalpha.com (LLM API).
+    WOLFRAM_APP_ID: z.string().optional(),
+
     // Telegram bot (optional - Telegram features disabled when missing)
     TELEGRAM_BOT_TOKEN: z.string().optional(),
     TELEGRAM_BOT_USERNAME: z.string().optional(),
@@ -81,6 +85,7 @@ export const env = createEnv({
     GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     NVIDIA_API_KEY: process.env.NVIDIA_API_KEY,
+    WOLFRAM_APP_ID: process.env.WOLFRAM_APP_ID,
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
     TELEGRAM_BOT_USERNAME: process.env.TELEGRAM_BOT_USERNAME,
     TELEGRAM_WEBHOOK_SECRET: process.env.TELEGRAM_WEBHOOK_SECRET,
