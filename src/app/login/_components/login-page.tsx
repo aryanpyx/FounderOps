@@ -18,9 +18,10 @@ export function LoginPage({ firstTime = false }: LoginPageProps) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
 
-  // Login form state
-  const [loginUsername, setLoginUsername] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
+  // Login form state — pre-filled with the demo/review account so evaluators can
+  // sign in with one click (this account holds the sample context + data).
+  const [loginUsername, setLoginUsername] = useState("madhandev");
+  const [loginPassword, setLoginPassword] = useState("thenameismad");
 
   // Register form state
   const [regEmail, setRegEmail] = useState("");
@@ -165,6 +166,32 @@ export function LoginPage({ firstTime = false }: LoginPageProps) {
               </form>
             </TabsContent>
           </Tabs>
+        </div>
+
+        {/* Reviewer credentials */}
+        <div className="mt-4 space-y-3">
+          <div className="rounded-lg border border-indigo-500/30 bg-indigo-500/[0.06] p-4 text-xs">
+            <p className="mb-2 font-semibold text-foreground">For reviewers — sign in with the demo account</p>
+            <p className="text-muted-foreground">
+              It&apos;s pre-filled below. It holds the sample founder context &amp; data.
+            </p>
+            <div className="mt-2 font-mono text-[11px] text-foreground">
+              <div>username: <span className="font-semibold">madhandev</span></div>
+              <div>password: <span className="font-semibold">thenameismad</span></div>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border bg-card p-4 text-xs">
+            <p className="mb-2 font-semibold text-foreground">Connected Gmail (for testing tool execution)</p>
+            <p className="text-muted-foreground">
+              A dedicated mailbox — no 2-step verification — already connected and containing the context needed to
+              watch tasks execute through the linked Google apps.
+            </p>
+            <div className="mt-2 font-mono text-[11px] text-foreground">
+              <div>email: <span className="font-semibold">founderops1@gmail.com</span></div>
+              <div>password: <span className="font-semibold">founder@1289</span></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
