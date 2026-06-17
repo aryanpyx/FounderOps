@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import Slack from '@/components/icons/Slack';
 import { FounderOpsLogo } from '@/components/FounderOpsLogo';
+import { DemoToggle } from '@/components/Demo';
 import { authClient } from '~/clients/auth/react';
 
 export default function Sidebar() {
@@ -187,7 +188,8 @@ export default function Sidebar() {
       </div>
 
       {/* Sidebar Footer */}
-      <div className="p-4 border-t border-border bg-card/60">
+      <div className="p-4 border-t border-border bg-card/60 space-y-3">
+        <DemoToggle />
         {/* User Card (real logged-in session) */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center font-bold text-xs text-indigo-300 shrink-0">

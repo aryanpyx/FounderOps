@@ -21,6 +21,7 @@ import Slack from '@/components/icons/Slack';
 import { dashboardService, type DashboardSummary } from '@/services/dashboardService';
 import type { MemoryItem, SourceSystem } from '@/types';
 import MemoryDetailPanel from '@/components/MemoryDetailPanel';
+import { NudgesCard } from '@/components/NudgesCard';
 
 export default function Dashboard() {
   const [data, setData] = useState<DashboardSummary | null>(null);
@@ -99,6 +100,9 @@ export default function Dashboard() {
           </span>
         </div>
       </div>
+
+      {/* Proactive nudges — the Chief of Staff layer */}
+      <NudgesCard onOpen={openMemoryDetails} />
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

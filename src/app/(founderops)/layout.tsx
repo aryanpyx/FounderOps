@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { auth } from "~/server/auth";
 import { db } from "~/server/clients/db";
 import Sidebar from "@/components/Sidebar";
+import { DemoBanner } from "@/components/Demo";
 
 export default async function FounderOpsLayout({
   children,
@@ -26,6 +27,7 @@ export default async function FounderOpsLayout({
     <div className="dark bg-background text-foreground flex min-h-screen flex-row">
       <Sidebar />
       <main className="grid-bg relative flex h-screen flex-1 flex-col overflow-y-auto">
+        <DemoBanner />
         {children}
       </main>
     </div>
