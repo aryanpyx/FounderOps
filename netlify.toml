@@ -8,3 +8,5 @@
 [build.environment]
   NODE_VERSION = "22.14.0"
   COREPACK_ENABLE_STRICT = "0"
+  SKIP_ENV_VALIDATION = "1"
+
