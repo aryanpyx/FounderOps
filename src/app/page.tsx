@@ -283,24 +283,9 @@ export default function Home() {
 
           <div className="mt-8 flex flex-col items-center gap-3">
             <span className="font-mono text-[11px] uppercase tracking-widest text-zinc-500">
-              Built by <span className="text-zinc-300">Team Jaam</span>
+              Built by <span className="text-zinc-300">Team Kasukabe Defence Force</span>
             </span>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {[
-                { name: 'Madhan', role: 'Product' },
-                { name: 'Jaysid', role: 'Engineering' },
-                { name: 'Abhishek', role: 'AI' },
-                { name: 'Abhinand', role: 'Design' },
-              ].map((m) => (
-                <span
-                  key={m.name}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-sm"
-                >
-                  <span className="font-semibold text-white">{m.name}</span>
-                  <span className="text-zinc-500">{m.role}</span>
-                </span>
-              ))}
-            </div>
+
             <p className="mt-2 font-mono text-[11px] uppercase tracking-widest text-zinc-500">
               Powered by TrustClaw · Composio · NVIDIA NIM · Wolfram|Alpha
             </p>
@@ -408,7 +393,7 @@ export default function Home() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="FounderOps" className="h-7 w-auto invert mix-blend-screen" />
           <p className="max-w-md text-center font-mono text-[11px] uppercase tracking-widest text-zinc-500">
-            Built by Team Jaam · Powered by TrustClaw, Composio, NVIDIA NIM &amp; Wolfram|Alpha
+            Built by Team Kasukabe Defence Force · Powered by TrustClaw, Composio, NVIDIA NIM &amp; Wolfram|Alpha
           </p>
           <Link href="/login" className="text-sm font-medium text-zinc-300 transition-colors hover:text-white">Launch app →</Link>
         </div>

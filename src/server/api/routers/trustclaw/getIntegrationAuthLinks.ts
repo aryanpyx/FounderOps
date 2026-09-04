@@ -23,6 +23,17 @@ export const getIntegrationAuthLinks = protectedProcedure.query(
   async ({ ctx }) => {
     const userId = ctx.session.user.id;
     const composio = createComposioClient();
+    if (!composio) {
+      return {
+        integrations: ONBOARDING_TOOLKITS.map((toolkit) => ({
+          toolkit: toolkit.slug,
+          name: toolkit.name,
+          logo: toolkit.logo,
+          connected: false,
+          redirectUrl: null,
+        })),
+      };
+    }
     const session = await composio.create(userId, {});
     const toolkitsInfo = await session.toolkits({
       toolkits: ONBOARDING_TOOLKITS.map((t) => t.slug),

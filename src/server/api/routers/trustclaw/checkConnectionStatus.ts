@@ -7,6 +7,14 @@ export const checkConnectionStatus = protectedProcedure
   .query(async ({ ctx, input }) => {
     const userId = ctx.session.user.id;
     const composio = createComposioClient();
+    if (!composio) {
+      return {
+        statuses: input.toolkits.map((toolkit) => ({
+          toolkit,
+          connected: false,
+        })),
+      };
+    }
     const session = await composio.create(userId, {});
 
     const toolkitsInfo = await session.toolkits({

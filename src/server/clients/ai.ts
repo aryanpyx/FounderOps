@@ -196,6 +196,7 @@ export async function callTool(
     if (!inst) return {};
 
     const composio = createComposioClient();
+    if (!composio) return {};
     const tools = await composio.tools.get(inst.userId, { tools: [toolName] });
     const tool = tools[toolName];
     if (!tool?.execute) return {}; // toolkit not connected for this user

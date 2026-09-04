@@ -65,6 +65,9 @@ export async function POST(request: Request) {
   try {
     // 1. Fetch recent emails (compact - no full MIME payload).
     const composio = createComposioClient();
+    if (!composio) {
+      return Response.json({ error: "composio_not_configured" }, { status: 400 });
+    }
     const tools = await composio.tools.get(instance.userId, {
       tools: ["GMAIL_FETCH_EMAILS"],
     });

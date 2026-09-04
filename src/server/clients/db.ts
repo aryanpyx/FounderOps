@@ -1,5 +1,6 @@
 import { PrismaClient } from "~/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 import { env } from "~/env";
 
 // Re-exported so the intelligence engine can reach Prisma types/helpers through
@@ -7,18 +8,23 @@ import { env } from "~/env";
 export { Prisma } from "~/generated/prisma/client";
 export type { FounderMemory as FounderMemoryRecord } from "~/generated/prisma/client";
 
-function ensureVerifyFullSsl(url: string): string {
-  const parsed = new URL(url);
-  if (parsed.searchParams.get("sslmode") !== "verify-full") {
-    parsed.searchParams.set("sslmode", "verify-full");
+function isLocalhost(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
+  } catch {
+    return false;
   }
-  return parsed.toString();
 }
 
 const createPrismaClient = () => {
-  const adapter = new PrismaPg({
-    connectionString: ensureVerifyFullSsl(env.DATABASE_URL),
+  const isLocal = isLocalhost(env.DATABASE_URL);
+  const pool = new Pool({
+    connectionString: env.DATABASE_URL,
+    ssl: isLocal ? false : { rejectUnauthorized: false },
   });
+
+  const adapter = new PrismaPg(pool);
 
   return new PrismaClient({
     adapter,

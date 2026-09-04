@@ -6,7 +6,9 @@ import { cache } from "react";
 
 import { createCaller, type AppRouter } from "~/server/api/root";
 import { createTRPCContext } from "~/server/api/trpc";
+import { dehydrate } from "@tanstack/react-query";
 import { getQueryClient } from "./query-client";
+import { HydrateClient as HydrateClientBoundary } from "./hydrate-client";
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
@@ -23,10 +25,19 @@ const createContext = cache(async () => {
 
 const caller = createCaller(createContext);
 
-const { trpc: api, HydrateClient } = createHydrationHelpers<AppRouter>(
+const { trpc: api } = createHydrationHelpers<AppRouter>(
   caller,
   getQueryClient,
 );
+
+export function HydrateClient(props: { children: React.ReactNode }) {
+  const queryClient = getQueryClient();
+  return (
+    <HydrateClientBoundary state={dehydrate(queryClient)}>
+      {props.children}
+    </HydrateClientBoundary>
+  );
+}
 
 /**
  * Server-side tRPC utilities.
@@ -38,5 +49,3 @@ export const trpcServer = {
   /** Hydrate client-side query cache from server prefetches */
   HydrateClient,
 };
-
-export { HydrateClient };

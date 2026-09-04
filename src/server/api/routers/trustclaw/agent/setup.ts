@@ -220,19 +220,21 @@ export async function prepareAgentRun(
   const uncuratedToolkits = toolkitSlugs.filter((tk) => !CURATED_TOOLS[tk]);
 
   const toolSets: ToolSet[] = [];
-  if (pinnedSlugs.length > 0) {
-    toolSets.push(
-      await composio.tools.get(instance.userId, { tools: pinnedSlugs }),
-    );
-  }
-  for (const tk of uncuratedToolkits) {
-    toolSets.push(
-      await composio.tools.get(instance.userId, {
-        toolkits: [tk],
-        important: true,
-        limit: 4,
-      }),
-    );
+  if (composio) {
+    if (pinnedSlugs.length > 0) {
+      toolSets.push(
+        await composio.tools.get(instance.userId, { tools: pinnedSlugs }),
+      );
+    }
+    for (const tk of uncuratedToolkits) {
+      toolSets.push(
+        await composio.tools.get(instance.userId, {
+          toolkits: [tk],
+          important: true,
+          limit: 4,
+        }),
+      );
+    }
   }
   const composioTools: ToolSet = Object.assign({}, ...toolSets);
 

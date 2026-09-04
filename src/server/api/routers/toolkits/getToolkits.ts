@@ -7,6 +7,18 @@ export const getToolkits = protectedProcedure
   .query(async ({ ctx, input }) => {
     const userId = ctx.session.user.id;
     const composio = createComposioClient();
+    if (!composio) {
+      return {
+        items: [
+          { slug: "gmail", name: "Gmail", logo: "https://logos.composio.dev/api/gmail", noAuth: false, connected: false },
+          { slug: "github", name: "GitHub", logo: "https://logos.composio.dev/api/github", noAuth: false, connected: false },
+          { slug: "slack", name: "Slack", logo: "https://logos.composio.dev/api/slack", noAuth: false, connected: false },
+          { slug: "googlecalendar", name: "Google Calendar", logo: "https://logos.composio.dev/api/googlecalendar", noAuth: false, connected: false },
+          { slug: "notion", name: "Notion", logo: "https://logos.composio.dev/api/notion", noAuth: false, connected: false },
+        ],
+        nextCursor: null,
+      };
+    }
     const session = await composio.create(userId, {});
 
     // 1. Fetch toolkit listing

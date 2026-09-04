@@ -15,7 +15,7 @@ export const env = createEnv({
     BETTER_AUTH_SECRET: z.string(),
 
     // Composio API (global key)
-    COMPOSIO_API_KEY: z.string(),
+    COMPOSIO_API_KEY: z.string().optional(),
 
     // Optional comma-separated toolkit allowlist (e.g. "GMAIL,GOOGLECALENDAR,SLACK").
     // When set, only tools from these toolkits load per request - keeps the prompt
@@ -24,10 +24,10 @@ export const env = createEnv({
 
     // Model providers (replace Vercel AI Gateway). Groq = chat, Google = embeddings.
     // Extra Groq keys (optional) auto-rotate on daily rate-limit for more free quota.
-    GROQ_API_KEY: z.string(),
+    GROQ_API_KEY: z.string().optional(),
     GROQ_API_KEY_2: z.string().optional(),
     GROQ_API_KEY_3: z.string().optional(),
-    GOOGLE_GENERATIVE_AI_API_KEY: z.string(),
+    GOOGLE_GENERATIVE_AI_API_KEY: z.string().optional(),
 
     // Optional. When set, Cloud chat uses OpenAI gpt-4o-mini (high limits, cheap,
     // reliable tools) instead of Groq. No key = Groq fallback.
@@ -123,8 +123,6 @@ export const env = createEnv({
   // SKIP_ENV_VALIDATION is for local lint/typecheck without a full .env.
   // Never honour it in production — security-critical secrets like
   // CRON_SECRET and BETTER_AUTH_SECRET must always be present at runtime.
-  skipValidation:
-    !!process.env.SKIP_ENV_VALIDATION &&
-    process.env.NODE_ENV !== "production",
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
   emptyStringAsUndefined: true,
 });

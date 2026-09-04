@@ -9,6 +9,12 @@ export const getAuthLink = protectedProcedure
   .mutation(async ({ ctx, input }) => {
     const userId = ctx.session.user.id;
     const composio = createComposioClient();
+    if (!composio) {
+      throw new TRPCError({
+        code: "PRECONDITION_FAILED",
+        message: "Composio API key is not configured in .env. Please set COMPOSIO_API_KEY to connect toolkits.",
+      });
+    }
     const session = await composio.create(userId, {});
 
     try {
