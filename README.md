@@ -1,10 +1,28 @@
 <div align="center">
 
-<img src="public/logo.png" alt="FounderOps" width="120" />
+<img src="public/logo.png" alt="FounderOps AI Logo" width="110" />
 
-# FounderOps
+# FounderOps AI
 
-### The memory layer for founders — never lose a decision, commitment, blocker, or metric.
+### 🧠 The memory layer for founders — never lose a decision, commitment, blocker, or metric.
+
+<br/>
+
+[![Next.js 15](https://img.shields.io/badge/Next.js-15-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![NVIDIA NIM](https://img.shields.io/badge/LLM-NVIDIA_NIM-76B900?style=for-the-badge&logo=nvidia&logoColor=white)](https://build.nvidia.com)
+[![Composio](https://img.shields.io/badge/Tools-Composio-6366F1?style=for-the-badge)](https://composio.dev)
+[![Wolfram](https://img.shields.io/badge/Compute-Wolfram_Alpha-DD1100?style=for-the-badge&logo=wolfram&logoColor=white)](https://www.wolfram.com/language/)
+[![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge)](./LICENSE)
+
+<br/>
+
+> **"One email in. Four memories out — with provenance, citations, and a live knowledge graph."**
+
+<br/>
+
+<img src="public/demo.png" alt="FounderOps product demo" width="900" />
 
 [![Next.js 15](https://img.shields.io/badge/Next.js-15-000000?logo=next.js&logoColor=white)](https://nextjs.org)
 [![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
